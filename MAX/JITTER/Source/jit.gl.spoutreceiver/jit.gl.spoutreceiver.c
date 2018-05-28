@@ -97,7 +97,7 @@
 #include "jit.gl.ob3d.h"
 #include "ext_obex.h"
 #include "string"
-#include "../../SpoutSDK/Spout.h"
+#include "Spout.h"
 
 
 t_jit_err jit_ob3d_dest_name_set(t_jit_object *x, void *attr, long argc, t_atom *argv);

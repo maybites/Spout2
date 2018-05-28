@@ -93,7 +93,7 @@
 #include "ext_obex.h"
 #include "string"
 
-#include "../../SpoutSDK/Spout.h"
+#include "Spout.h"
 
 typedef struct _jit_gl_spoutsender
 {

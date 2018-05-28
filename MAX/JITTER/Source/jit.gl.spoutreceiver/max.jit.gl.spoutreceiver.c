@@ -57,7 +57,7 @@
 #include "jit.common.h"
 #include "jit.gl.h"
 #include "ext_obex.h"
-#include "../../SpoutSDK/Spout.h"
+#include "Spout.h"
 
 // Check for 64bit compile
 #ifdef _WIN64
