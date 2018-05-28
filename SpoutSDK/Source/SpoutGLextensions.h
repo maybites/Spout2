@@ -63,7 +63,9 @@
 // #define GLEW_STATIC
 
 // *** Load of FBO extensions conflicts with FFGL or Jitter, disable them here ***
-#define USE_FBO_EXTENSIONS // don't use for jitter
+#ifndef UNDEF_USE_FBO_EXTENSIONS
+	#define USE_FBO_EXTENSIONS // don't use for jitter
+#endif
 
 // If load of PBO extensions conflicts, disable them here - OK for Jitter
 #define USE_PBO_EXTENSIONS

@@ -38,6 +38,7 @@ Icon
 
 MAX/JITTER/c74support/*
 MAX/JITTER/sysbuild/*
+MAX/externals/*
 .vs/
 *.VC.db
 *.VC.opendb
