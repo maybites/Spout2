@@ -36,10 +36,11 @@ Icon
 .Spotlight-V100
 .Trashes
 
-MAX/JITTER/c74support/*
+#MAX/JITTER/c74support/*
 MAX/JITTER/sysbuild/*
 .vs/
 *.VC.db
 *.VC.opendb
 *.ilk
 *.pdb
+*.user
