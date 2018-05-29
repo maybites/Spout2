@@ -4,8 +4,11 @@
 /****************************************************************************/
 
 #include "jit.gl.h"
-#ifndef GL3_VERSION
-#include "jit.gl.procs.h"
+#if defined(WIN_VERSION) || !defined(GL3_VERSION)
+	#define JIT_GL_USE_PROCS 1
+#endif
+#ifdef JIT_GL_USE_PROCS
+	#include "jit.gl.procs.h"
 #endif
 #include "jit.gl.support.h"
 #include "jit.gl.pixelformat.h"
@@ -30,7 +33,7 @@ typedef struct _jit_gl_context_struct
 	t_jit_gl_native_context			context;
 	t_jit_gl_native_device			device;
 	t_jit_gl_native_pixelformat 	pixelformat;
-#ifndef GL3_VERSION
+#ifdef JIT_GL_USE_PROCS
 	t_jit_gl_extprocs				*procs;			// proc table for opengl extensions
 #endif
 	t_jit_gl_support				*support;		// opengl feature support
@@ -42,7 +45,7 @@ typedef struct _jit_gl_context_struct
 	void							*auxdata;
 	void							*offscreentex;
 	void							*offscreenfbo;
-#ifdef WIN_VERSION
+#ifdef JIT_GL_USE_PROCS
 	t_jit_gl_platform_data			platform_data;
 #endif
 } t_jit_gl_context_struct, *t_jit_gl_context;

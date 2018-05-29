@@ -63,16 +63,24 @@
 		#define GL_QUAD_STRIP                     0x0008
 		#define GL_POLYGON                        0x0009
 
+		#define GLsizeiptrARB GLsizeiptr
+		#define GLintptrARB GLintptr
+		#define GLhandleARB unsigned int
+		#define GLcharARB GLchar
+		#define GLhalfARB unsigned short
+		#define GLhalfNV unsigned short
+
 	#else
 
 		#include "gl\gl.h"
 		#include "gl\glu.h"
 		#include "jit.wglext.h"
 		#include "jit.glext.h"
-		#define glGetProcAddress wglGetProcAddress
-		#define glCheckFramebufferStatus glCheckFramebufferStatusEXT
-
 	#endif
+	
+	#define glGetProcAddress wglGetProcAddress
+	#define glCheckFramebufferStatus glCheckFramebufferStatusEXT
+
 
 	/*
 	Key object types:

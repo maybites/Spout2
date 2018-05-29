@@ -273,6 +273,8 @@ typedef struct _jit_gl_texture_ex {
 	long				rectangle;		// 2D textures use rectangle target
 	long				flip;
 	t_symbol			*name;
+	method				bindmeth;
+	method				unbindmeth;
 } t_jit_gl_texture_ex;
 	
 #ifdef __cplusplus

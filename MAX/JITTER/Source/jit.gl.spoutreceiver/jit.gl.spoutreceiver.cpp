@@ -95,7 +95,9 @@
 #include "jit.common.h"
 #include "jit.gl.h"
 #include "jit.gl.ob3d.h"
+#include "jit.gl.draw.h"
 #include "ext_obex.h"
+#include "ext_preferences.h"
 #include "string"
 #include "Spout.h"
 
@@ -132,7 +134,9 @@ typedef struct _jit_gl_spout_receiver
 
 	// internal jit.gl.texture object
 	t_jit_object *output;
-	
+	void		 *geometry;
+	t_jit_gl_texture_ex *ext_tex;
+	bool		 bIsGL3;
 
 } t_jit_gl_spout_receiver;
 
@@ -377,6 +381,9 @@ t_jit_gl_spout_receiver *jit_gl_spout_receiver_new(t_symbol * dest_name)
 		// create and attach ob3d
 		jit_ob3d_new(x, dest_name);
 
+		x->bIsGL3 = (preferences_getsym("glversion") == gensym("gl3"));
+		x->geometry = NULL;
+		x->ext_tex = NULL;
 
 	} 
 	else {
@@ -404,6 +411,14 @@ void jit_gl_spout_receiver_free(t_jit_gl_spout_receiver *x)
 	// Delete the Receiver object last.
 	if(x->myReceiver) delete x->myReceiver;
 	x->myReceiver = NULL;
+
+	if (x->geometry)
+		jit_object_free(x->geometry);
+	x->geometry = NULL;
+	if (x->ext_tex)
+		jit_object_free(x->ext_tex);
+	x->ext_tex = NULL;
+
 }
 
 t_jit_err jit_gl_spout_receiver_dest_closing(t_jit_gl_spout_receiver *x)
@@ -425,6 +440,13 @@ t_jit_err jit_gl_spout_receiver_dest_closing(t_jit_gl_spout_receiver *x)
 
 	x->bInitialized = false; // Initialize again in draw
 	x->bDestClosing = true;
+
+	if (x->geometry)
+		jit_object_free(x->geometry);
+	x->geometry = NULL;
+	if (x->ext_tex)
+		jit_object_free(x->ext_tex);
+	x->ext_tex = NULL;
 
 	return JIT_ERR_NONE;
 }
@@ -461,6 +483,110 @@ t_jit_err jit_gl_spout_receiver_drawto(t_jit_gl_spout_receiver *x, t_symbol *s, 
 	return JIT_ERR_NONE;
 }
 
+void jit_gl_spout_receiver_drawgl2(t_jit_gl_spout_receiver *x, GLuint texname)
+{
+	// We have a shared texture and can render into the jitter texture
+	// An FBO for render to texture
+	GLuint tempFBO;
+	glGenFramebuffersEXT(1, &tempFBO);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, tempFBO);
+	// Attach the jitter texture (destination) to the color buffer in our frame buffer  
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_EXT, texname, 0);
+	if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT) {
+
+		// If memoryshare, draw the local OpenGL texture into it
+		// Not needed for texture share
+		if (x->memoryshare == 1) {
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, x->g_GLtexture);
+			glColor3f(1.0, 1.0, 1.0);
+			glBegin(GL_QUADS);
+			glTexCoord2d(0, 0);
+			glVertex2d(-1, 1); // lower left
+			glTexCoord2d(0, 1);
+			glVertex2d(-1, -1); // upper left
+			glTexCoord2d(1, 1);
+			glVertex2d(1, -1); // upper right
+			glTexCoord2d(1, 0);
+			glVertex2d(1, 1); // lower right
+			glEnd();
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glDisable(GL_TEXTURE_2D);
+		}
+		else {
+			// Otherwise draw the shared texture straight into it
+			x->myReceiver->DrawSharedTexture();
+		}
+	}
+
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glDeleteFramebuffersEXT(1, &tempFBO);
+	tempFBO = 0;
+}
+
+t_jit_gl_texture_ex *new_external_texture(t_jit_gl_spout_receiver *x)
+{
+	t_jit_gl_texture_ex *tob = (t_jit_gl_texture_ex *)jit_object_new(gensym("jit_gl_texture_ex"));
+	tob->pob = x;
+	tob->id = -1;
+	tob->target = GL_TEXTURE_2D;
+	tob->dim[0] = 1;
+	tob->dim[1] = 1;
+	tob->dim[2] = 1;
+	tob->rectangle = 0;
+	tob->name = jit_symbol_unique();
+	return tob;
+}
+
+void jit_gl_spout_bindtex(void *receiver)
+{
+	t_jit_gl_spout_receiver *x = (t_jit_gl_spout_receiver*)receiver;
+	x->myReceiver->BindSharedTexture();
+}
+
+void jit_gl_spout_unbindtex(void *receiver)
+{
+	t_jit_gl_spout_receiver *x = (t_jit_gl_spout_receiver*)receiver;
+	x->myReceiver->UnBindSharedTexture();
+}
+
+void jit_gl_spout_receiver_draw_gl3(t_jit_gl_spout_receiver *x)
+{
+	void *state = jit_ob3d_state_get((t_jit_object*)x);
+	if (!x->geometry) {
+		x->geometry = jit_gl_fs_quad_getgeometry(1);
+	}
+	if (!x->ext_tex) {
+		x->ext_tex = new_external_texture(x);
+	}
+	if (x->g_GLtexture) {
+		x->ext_tex->id = x->g_GLtexture;
+		x->ext_tex->bindmeth = NULL;
+		x->ext_tex->unbindmeth = NULL;
+
+	}
+	else {
+		x->ext_tex->id = 0;
+		x->ext_tex->bindmeth = (method)jit_gl_spout_bindtex;
+		x->ext_tex->unbindmeth = (method)jit_gl_spout_unbindtex;
+	}
+	
+	x->ext_tex->dim[0] = x->g_Width;
+	x->ext_tex->dim[1] = x->g_Height;
+
+	jit_object_method_typed(x->output, gensym("begin_capture"), 0, NULL, NULL);
+
+	jit_gl_state_bind_texture(state, 0, x->ext_tex);
+	jit_object_method(x->ext_tex, gensym("set_transform"), state, 0);
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+	jit_gl_fs_quad_draw(x->geometry, state, x->ext_tex->dim[0], x->ext_tex->dim[1]);
+	jit_gl_state_unbind_texture(state, 0, x->ext_tex);
+
+	jit_object_method_typed(x->output, gensym("end_capture"), 0, NULL, NULL);
+}
 
 t_jit_err jit_gl_spout_receiver_draw(t_jit_gl_spout_receiver *x)
 {
@@ -585,44 +711,15 @@ t_jit_err jit_gl_spout_receiver_draw(t_jit_gl_spout_receiver *x)
 				jit_attr_setlong_array(x, _jit_sym_dim, 2, newdim); // dimensions
 
 			}
-			else {
-				// We have a shared texture and can render into the jitter texture
-				// An FBO for render to texture
-				GLuint tempFBO;
-				glGenFramebuffersEXT(1, &tempFBO);
-				glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, tempFBO); 
-				// Attach the jitter texture (destination) to the color buffer in our frame buffer  
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_EXT, texname, 0);
-				if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT) {
-
-					// If memoryshare, draw the local OpenGL texture into it
-					// Not needed for texture share
-					if(x->memoryshare == 1) {
-						glEnable(GL_TEXTURE_2D);
-						glBindTexture(GL_TEXTURE_2D, x->g_GLtexture);
-						glColor3f(1.0,  1.0, 1.0);
-						glBegin(GL_QUADS);
-						glTexCoord2d(0, 0);
-						glVertex2d(-1,  1); // lower left
-						glTexCoord2d(0, 1);	
-						glVertex2d(-1, -1); // upper left
-						glTexCoord2d(1, 1);	
-						glVertex2d( 1, -1); // upper right
-						glTexCoord2d(1, 0);	
-						glVertex2d( 1,  1); // lower right
-						glEnd();
-						glBindTexture(GL_TEXTURE_2D, 0);
-						glDisable(GL_TEXTURE_2D);
-					}
-					else {
-						// Otherwise draw the shared texture straight into it
-						x->myReceiver->DrawSharedTexture();
-					}
+			else { 
+				if (!x->bIsGL3) {
+					jit_gl_spout_receiver_drawgl2(x, texname);
 				}
-
-				glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-				glDeleteFramebuffersEXT(1, &tempFBO);
-				tempFBO = 0;
+				else {
+					newdim[0] = x->g_Width;
+					newdim[1] = x->g_Height;
+					jit_gl_spout_receiver_draw_gl3(x);
+				}
 			}
 		} // Received texture OK
 		else {
@@ -644,98 +741,103 @@ t_jit_err jit_gl_spout_receiver_draw(t_jit_gl_spout_receiver *x)
 
 void SaveOpenGLstate(t_jit_gl_spout_receiver *x, GLuint width, GLuint height, GLint &previousFBO, GLint &previousMatrixMode,  GLint &previousActiveTexture, float *vpdim)
 {
+	if (!x->bIsGL3) {
+		float fx, fy, as, vpScaleX, vpScaleY, vpWidth, vpHeight;
+		int vpx, vpy;
 
-	float fx, fy, as, vpScaleX, vpScaleY, vpWidth, vpHeight;
-	int vpx, vpy;
-
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &previousFBO);
-	glGetIntegerv(GL_MATRIX_MODE, &previousMatrixMode);
-	glGetIntegerv(GL_ACTIVE_TEXTURE, &previousActiveTexture);
-	
-	// Save texture state, client state, etc.
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
-
-	// Syphon note :
-	// Jitter uses multiple texture coordinate arrays on different units
-	// http://s-musiclab.jp/mmj_docs/max5/develop/MaxSDK-5.1.1_J/html/jit_8gl_8texture_8c_source.html
-	// We need to ensure we set this before changing our texture matrix
-	// glActiveTexture selects which texture unit subsequent texture state calls will affect.
-	glActiveTexture(GL_TEXTURE0);
-
-	// ensure we act on the proper client texture as well
-	glClientActiveTexture(GL_TEXTURE0);
-
-	glMatrixMode(GL_TEXTURE);
-	glPushMatrix();
-	glLoadIdentity();
-
-	// find the viewport size in order to scale to the aspect ratio
-	glGetFloatv(GL_VIEWPORT, vpdim);
-
-	// Scale width and height to the current viewport size
-	if(width > 0 && x->g_Width > 0 && height > 0 && x->g_Height > 0) {
-		vpScaleX = width/(float)x->g_Width;			// vpdim[2]/(float)x->g_Width;
-		vpScaleY = height/(float)x->g_Height;		// vpdim[3]/(float)x->g_Height;
-		vpWidth  = (float)x->g_Width  * vpScaleX;
-		vpHeight = (float)x->g_Height * vpScaleY;
-		vpx = vpy = 0;
-
-		// User selection flag to preserve aspect ratio or not
-		if(x->aspect == 1) {
-			// back to original aspect ratio
-			as = (float)x->g_Width/(float)x->g_Height;
-			if(x->g_Width > x->g_Height) {
-				fy = vpWidth/as;
-				vpy = (int)(vpHeight-fy)/2;
-				vpHeight = fy;
-			}
-			else {
-				fx = vpHeight/as;
-				vpx = (int)(vpWidth-fx)/2;
-				vpWidth = fx;
-			}
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &previousFBO);
+		if (!x->bIsGL3) {
+			glGetIntegerv(GL_MATRIX_MODE, &previousMatrixMode);
 		}
-		glViewport((int)vpx, (int)vpy, (int)vpWidth, (int)vpHeight);
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &previousActiveTexture);
+	
+		// Save texture state, client state, etc.
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+
+		// Syphon note :
+		// Jitter uses multiple texture coordinate arrays on different units
+		// http://s-musiclab.jp/mmj_docs/max5/develop/MaxSDK-5.1.1_J/html/jit_8gl_8texture_8c_source.html
+		// We need to ensure we set this before changing our texture matrix
+		// glActiveTexture selects which texture unit subsequent texture state calls will affect.
+		glActiveTexture(GL_TEXTURE0);
+
+		// ensure we act on the proper client texture as well
+		glClientActiveTexture(GL_TEXTURE0);
+
+		glMatrixMode(GL_TEXTURE);
+		glPushMatrix();
+		glLoadIdentity();
+
+		// find the viewport size in order to scale to the aspect ratio
+		glGetFloatv(GL_VIEWPORT, vpdim);
+
+		// Scale width and height to the current viewport size
+		if (width > 0 && x->g_Width > 0 && height > 0 && x->g_Height > 0) {
+			vpScaleX = width / (float)x->g_Width;			// vpdim[2]/(float)x->g_Width;
+			vpScaleY = height / (float)x->g_Height;		// vpdim[3]/(float)x->g_Height;
+			vpWidth = (float)x->g_Width  * vpScaleX;
+			vpHeight = (float)x->g_Height * vpScaleY;
+			vpx = vpy = 0;
+
+			// User selection flag to preserve aspect ratio or not
+			if (x->aspect == 1) {
+				// back to original aspect ratio
+				as = (float)x->g_Width / (float)x->g_Height;
+				if (x->g_Width > x->g_Height) {
+					fy = vpWidth / as;
+					vpy = (int)(vpHeight - fy) / 2;
+					vpHeight = fy;
+				}
+				else {
+					fx = vpHeight / as;
+					vpx = (int)(vpWidth - fx) / 2;
+					vpWidth = fx;
+				}
+			}
+			glViewport((int)vpx, (int)vpy, (int)vpWidth, (int)vpHeight);
+		}
+
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0f, 1.0f);
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
 	}
-
-	glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-	glLoadIdentity();
-	glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0f, 1.0f);
-                               
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-
 }
 
 void RestoreOpenGLstate(t_jit_gl_spout_receiver *x, GLint previousFBO, GLint previousMatrixMode,  GLint previousActiveTexture, float vpdim[4])
 {
 	UNREFERENCED_PARAMETER(x);
 
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
+	if (!x->bIsGL3) {
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
 
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
 
-	glMatrixMode(GL_TEXTURE);
-	glPopMatrix();
-	glMatrixMode(previousMatrixMode);
+		glMatrixMode(GL_TEXTURE);
+		glPopMatrix();
+		glMatrixMode(previousMatrixMode);
 
-	glActiveTexture(previousActiveTexture);
+		glActiveTexture(previousActiveTexture);
 
-	// ensure we act on the proper client texture as well
-	glPopClientAttrib();
-	glClientActiveTexture(previousActiveTexture);
+		// ensure we act on the proper client texture as well
 
-	glPopAttrib();
+		glPopClientAttrib();
+		glClientActiveTexture(previousActiveTexture);
 
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, previousFBO);
+		glPopAttrib();
 
-	// Restore the viewport
-	glViewport((int)vpdim[0], (int)vpdim[1], (GLsizei)vpdim[2], (GLsizei)vpdim[3]);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, previousFBO);
+
+		// Restore the viewport
+		glViewport((int)vpdim[0], (int)vpdim[1], (GLsizei)vpdim[2], (GLsizei)vpdim[3]);
+	}
 }
 
 
