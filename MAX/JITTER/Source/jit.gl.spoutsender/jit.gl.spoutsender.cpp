@@ -91,6 +91,7 @@
 #include "jit.gl.h"
 #include "jit.gl.ob3d.h"
 #include "ext_obex.h"
+#include "ext_preferences.h"
 #include "string"
 
 #include "Spout.h"
@@ -127,6 +128,7 @@ typedef struct _jit_gl_spoutsender
 
 	bool bDestClosing;
 	bool bDestChanged;
+	bool bIsGL3;
 
 } t_jit_gl_spoutsender;
 
@@ -307,6 +309,7 @@ t_jit_gl_spoutsender *jit_gl_spoutsender_new(t_symbol *dest_name)
 			jit_object_error((t_object *)x,"jit.gl.spoutsender: could not create texture");
 			x->textureSource = _jit_sym_nothing;		
 		}
+		x->bIsGL3 = (preferences_getsym("glversion") == gensym("gl3"));
 	} 
 	else {
 		x = NULL;
@@ -343,9 +346,9 @@ t_jit_err jit_gl_spoutsender_dest_closing(t_jit_gl_spoutsender *x)
 	GLint previousActiveTexture;
 
 	// Release sender if initialized
-	SaveOpenGLstate(x, previousFBO, previousMatrixMode, previousActiveTexture, vpdim);
+	if(!x->bIsGL3) SaveOpenGLstate(x, previousFBO, previousMatrixMode, previousActiveTexture, vpdim);
 	if(x->bInitialized)	x->mySender->ReleaseSender();
-	RestoreOpenGLstate(x, previousFBO, previousMatrixMode, previousActiveTexture, vpdim);
+	if (!x->bIsGL3) RestoreOpenGLstate(x, previousFBO, previousMatrixMode, previousActiveTexture, vpdim);
 
 	x->bInitialized = false; // Initialize again in draw
 	x->bDestClosing = true;
@@ -434,6 +437,12 @@ t_jit_err jit_gl_spoutsender_draw(t_jit_gl_spoutsender *x)
 
 		// get our latest texture info.
 		t_jit_object *texture = (t_jit_object*)jit_object_findregistered(x->textureSource);
+		bool sourceIsMatrix = (x->textureSource == jit_attr_getsym(x->texture, _jit_sym_name));
+		if (sourceIsMatrix && x->bIsGL3)
+		{
+			jit_object_method_typed(texture, gensym("bind"), 0, NULL, NULL);
+			jit_object_method_typed(texture, gensym("unbind"), 0, NULL, NULL);
+		}
 
 		GLuint texId     = (GLuint)jit_attr_getlong(texture, ps_glid);
 		GLuint texWidth  = (GLuint)jit_attr_getlong(texture, ps_width);
@@ -444,7 +453,9 @@ t_jit_err jit_gl_spoutsender_draw(t_jit_gl_spoutsender *x)
 		if(texId > 0 && texWidth > 0 && texHeight > 0)	{
 
 			// Save OpenGL state
-			SaveOpenGLstate(x, previousFBO, previousMatrixMode, previousActiveTexture, vpdim);
+			if (!x->bIsGL3) {
+				SaveOpenGLstate(x, previousFBO, previousMatrixMode, previousActiveTexture, vpdim);
+			}
 
 			// Create a sender if it is not initialized ---
 			if(!x->bInitialized) {
@@ -475,7 +486,9 @@ t_jit_err jit_gl_spoutsender_draw(t_jit_gl_spoutsender *x)
 			} // end if size was OK and normal draw
 
 			// Restore everything
-			RestoreOpenGLstate(x, previousFBO, previousMatrixMode, previousActiveTexture, vpdim);
+			if (!x->bIsGL3) {
+				RestoreOpenGLstate(x, previousFBO, previousMatrixMode, previousActiveTexture, vpdim);
+			}
 
 		} // endif texId && width > 0 && height > 0
 
