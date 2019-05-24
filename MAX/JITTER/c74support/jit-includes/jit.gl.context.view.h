@@ -39,6 +39,7 @@ typedef struct _jit_gl_context_view_cache {
     long	idlemouse;
     long	mousewheel;
     long    allow_hi_res;
+	long 	threaded;
 } t_jit_gl_context_view_cache;
 
 /**
@@ -81,11 +82,14 @@ typedef struct _jit_gl_context_view {
 	long				freeing;			///< in the process of freeing flag
 	long				creating;			///< in the process of creating flag
 	long				destroying;			///< in the process of destroying flag
+	long				recreating;
 	float				scalefactor;		///< scaling factor when drawing to retina display
 	long				allow_hi_res;		///< allows for high resolution drawing when available
 	char				view_valid;
 	char				first_frame;
 	void				*nativewinhandle;	///< patcher native window handle, for offscreen contexts
+	char				is_mfl;
+	char				threaded;
 } t_jit_gl_context_view;
 
 

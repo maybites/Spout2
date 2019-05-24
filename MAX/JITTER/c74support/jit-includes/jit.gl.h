@@ -29,7 +29,6 @@
 	#include <OpenGL/OpenGL.h>
 
 	void * nsglGetProcAddress (const char *pszProc);
-	void nsglSetRect(void *context, GLint *val);
 
 	#define glGetProcAddress nsglGetProcAddress
 
@@ -98,13 +97,13 @@
 
 	typedef struct _jit_gl_platform_data {
 		PROC set_swap_interval;
-		float scalefactor;
 	} t_jit_gl_platform_data;
 
 #endif	// WIN_VERSION
 
 // --------------------------------------------------------------------------------
 
+#include "jit.gl.draw.h"
 #include "jit.gl.chunk.h"
 #include "jit.gl.ob3d.h"
 #ifndef GL3_VERSION
@@ -149,6 +148,9 @@ long jit_gl_report_error (char *prefix);
 long jit_gl_object_report_error (void *x, char *prefix);
 void jit_gl_object_error (void *x, char *s, ...);
 
+// only valid for the life of a render draw call
+double jit_gl_get_current_scalefactor();
+	
 // --------------------------------------------------------------------------------
 // query methods
 
@@ -167,7 +169,7 @@ t_jit_err jit_gl_worldtoscreen(t_jit_object *x, t_point_3d p_world, t_point_3d p
 t_jit_err jit_gl_screentoworld(t_jit_object *x, t_point_3d p_screen, t_point_3d p_world);
 extern void * jit_gl_getscenegraph(t_symbol *ctx);
 
-t_jit_err jit_err_from_max_err(t_max_err err);
+t_jit_err jit_gl_err_from_max_err(t_max_err err);
 
 /****************************************************************************/
 

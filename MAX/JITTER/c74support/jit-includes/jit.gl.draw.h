@@ -87,6 +87,10 @@ typedef enum {
 	VIEW_TAG_NORMAL,
 	VIEW_TAG_COLOR,
 	VIEW_TAG_INDEX,
+	VIEW_TAG_SPECULAR,
+	VIEW_TAG_EDGEFLAG,
+	VIEW_TAG_TANGENT,
+	VIEW_TAG_VERTEX_ATTR,
 
 	// buffer types
 	VIEW_TAG_CHAR,
@@ -230,6 +234,8 @@ void jit_gl_fogf(e_jit_state pname, float v);
 void jit_gl_fogfv(e_jit_state pname, float *v);
 void jit_gl_matrix_mode(e_jit_state mode);
 t_jit_mat4 * jit_gl_get_matrix();
+void jit_gl_get_modelview_matrix(t_jit_mat4 * modelview);
+void jit_gl_get_projection_matrix(t_jit_mat4 * proj);
 void jit_gl_push_matrix();
 void jit_gl_pop_matrix();
 void jit_gl_load_identity();
@@ -253,6 +259,7 @@ void jit_gl_immediate_color4f(float r, float g, float b, float a);
 void *jit_gl_immediate_getgeometry();
 
 void *jit_ob3d_state_get(t_jit_object *x);
+void jit_ob3d_state_set(t_jit_object *x, void *state);
 void jit_ob3d_state_begin(t_jit_object *x);
 void jit_ob3d_state_end(t_jit_object *x);
 	
@@ -276,6 +283,8 @@ typedef struct _jit_gl_texture_ex {
 	method				bindmeth;
 	method				unbindmeth;
 } t_jit_gl_texture_ex;
+	
+t_jit_err jit_gl_texture_ex_set_transform(t_jit_gl_texture_ex *x, void *state, long unit);
 	
 #ifdef __cplusplus
 }

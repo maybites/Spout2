@@ -38,9 +38,9 @@ t_jit_err jit_ob3d_set_context(void *x);
 t_jit_err jit_ob3d_draw_chunk(void *ob3d, t_jit_glchunk * chunk);
 void jit_ob3d_set_viewport(void *v, long x, long y, long width, long height);
 
+void * ob3d_maxob_get(void *v);
 void * ob3d_jitob_get(void *v);
 void * ob3d_patcher_get(void *v);
-void * ob3d_next_get(void *v);
 long ob3d_auto_get(void *v);
 long ob3d_enable_get(void *v);
 long ob3d_ui_get(void *v);
@@ -52,7 +52,6 @@ void ob3d_dest_dim_get(void *v, long *width, long *height);
 void ob3d_render_ptr_set(void *v, void *render_ptr);
 void * ob3d_render_ptr_get(void *v);
 
-void * ob3d_get_light(void *v, long index);
 void ob3d_set_color(void *v, float *color);
 void ob3d_get_color(void *v, float *color);
 long ob3d_texture_count(void *v);

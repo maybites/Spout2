@@ -45,7 +45,7 @@ typedef struct _jit_gl_context_struct
 	void							*auxdata;
 	void							*offscreentex;
 	void							*offscreenfbo;
-#ifdef JIT_GL_USE_PROCS
+#ifdef WIN_VERSION
 	t_jit_gl_platform_data			platform_data;
 #endif
 } t_jit_gl_context_struct, *t_jit_gl_context;
@@ -58,6 +58,7 @@ typedef struct _jit_gl_context_info
 	t_jit_gl_context				share;
 	t_jit_gl_pixelformat			*pixelformat;
 	void							*nativewin;
+	short							samples;
 } t_jit_gl_context_info;
 
 

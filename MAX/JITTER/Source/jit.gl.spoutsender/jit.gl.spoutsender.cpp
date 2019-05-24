@@ -309,7 +309,7 @@ t_jit_gl_spoutsender *jit_gl_spoutsender_new(t_symbol *dest_name)
 			jit_object_error((t_object *)x,"jit.gl.spoutsender: could not create texture");
 			x->textureSource = _jit_sym_nothing;		
 		}
-		x->bIsGL3 = (preferences_getsym("glversion") == gensym("gl3"));
+		x->bIsGL3 = (preferences_getsym("glengine") == gensym("gl3"));
 	} 
 	else {
 		x = NULL;

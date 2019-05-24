@@ -381,7 +381,7 @@ t_jit_gl_spout_receiver *jit_gl_spout_receiver_new(t_symbol * dest_name)
 		// create and attach ob3d
 		jit_ob3d_new(x, dest_name);
 
-		x->bIsGL3 = (preferences_getsym("glversion") == gensym("gl3"));
+		x->bIsGL3 = (preferences_getsym("glengine") == gensym("gl3"));
 		x->geometry = NULL;
 		x->ext_tex = NULL;
 

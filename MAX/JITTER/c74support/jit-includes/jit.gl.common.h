@@ -68,9 +68,10 @@ extern "C" {
 #define JIT_OB3D_NO_COLOR					1 << 14     ///< ob3d flag @ingroup jitter
 #define JIT_OB3D_IS_SLAB					1 << 15     ///< ob3d flag @ingroup jitter
 #define JIT_OB3D_NO_SHADER					1 << 16
-#define JIT_OB3D_PASS_THRU					1 << 17
+#define JIT_OB3D_IS_NODE					1 << 17
 #define JIT_OB3D_IS_CAMERA					1 << 18
 #define JIT_OB3D_NO_BOUNDS					1 << 19
+#define JIT_OB3D_NO_POSITION				1 << 20
 	
 	
 
@@ -83,7 +84,7 @@ typedef long t_jit_gl_context_modifier;
 
 
 
-extern t_symbol *_jit_glversion;
+extern t_symbol *_jit_glengine;
 
 
 
@@ -95,7 +96,8 @@ void max_jit_ob3d_attach(void *x, t_jit_object *jit_ob, void *outlet);
 void max_jit_ob3d_detach(void *x);
 t_jit_err max_jit_ob3d_assist(void *x, void *b, long m, long a, char *s);
 t_atom_long max_jit_ob3d_acceptsdrag(void *x, t_object *drag, t_object *view);
-
+void max_jit_ob3d_seterrorob(void *x);
+void* max_jit_ob3d_geterrorob();
 
 	
 /**
@@ -106,6 +108,7 @@ typedef struct {
 	t_atom		mouseatoms[8];	///< h, v, (up/down), cmdKey, shiftKey, alphaLock, option, control.
 	int			argc;			///< argument count
 	t_symbol 	*mousesymbol;	///< mouse event type
+	double		scalefactor;
 }  t_wind_mouse_info;
 
 typedef struct {
