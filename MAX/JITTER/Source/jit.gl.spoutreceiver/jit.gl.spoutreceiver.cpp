@@ -663,7 +663,17 @@ t_jit_err jit_gl_spout_receiver_draw(t_jit_gl_spout_receiver *x)
 
 			// For memoryshare create a local OpenGL texture of the same size
 			if(x->memoryshare == 1)	InitTexture(x);
-
+			{
+				HANDLE hSharehandle = NULL;
+				DWORD dwFormat = 0;
+				unsigned int w, h;
+				x->myReceiver->GetSenderInfo(x->g_SenderName, w, h, hSharehandle, dwFormat);
+				
+				jit_attr_setsym(
+					x->output, gensym("type"), 
+					dwFormat == DXGI_FORMAT_R16G16B16A16_FLOAT ? gensym("float32") : gensym("char")
+				);
+			}
 			// Update output texture to the new size
 			newdim[0] = x->g_Width;
 			newdim[1] = x->g_Height;

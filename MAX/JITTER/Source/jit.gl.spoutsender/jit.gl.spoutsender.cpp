@@ -125,6 +125,7 @@ typedef struct _jit_gl_spoutsender
 	int g_Width;			// width
 	int g_Height;			// height
 	char g_SenderName[256]; // sender name - link with sendername
+	t_symbol *textype;
 
 	bool bDestClosing;
 	bool bDestChanged;
@@ -286,6 +287,7 @@ t_jit_gl_spoutsender *jit_gl_spoutsender_new(t_symbol *dest_name)
 		x->g_Width       = 0;
 		x->g_Height      = 0;
 		x->g_texId       = 0;
+		x->textype		 = _jit_sym_char;
 		x->mySender      = NULL;
 		x->invert        = 1; // invert texture when sending - default true
 
@@ -455,6 +457,8 @@ t_jit_err jit_gl_spoutsender_draw(t_jit_gl_spoutsender *x)
 		GLuint texHeight = (GLuint)jit_attr_getlong(texture, ps_height);
 		GLuint texTarget = (GLuint)jit_attr_getlong(texture, ps_gltarget);
 
+		t_symbol *textype = jit_attr_getsym(texture, gensym("type"));
+
 		// all of these must be > 0
 		if(texId > 0 && texWidth > 0 && texHeight > 0)	{
 
@@ -468,10 +472,23 @@ t_jit_err jit_gl_spoutsender_draw(t_jit_gl_spoutsender *x)
 				// Get memoryshare mode - unused at present
 				// x->bMemoryshare = x->mySender->GetMemoryShareMode();
 				// Create a sender
-				if(x->mySender->CreateSender(x->g_SenderName, texWidth, texHeight)) {
+				DWORD format = 0;
+				if (
+					textype == _jit_sym_float32 ||
+					textype == gensym("float16") ||
+					textype == gensym("float")
+				) {
+					format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+				}
+				else {
+					x->mySender->SetDX9compatible(true);
+				}
+					
+				if(x->mySender->CreateSender(x->g_SenderName, texWidth, texHeight, format)) {
 					x->g_texId	= texId;
 					x->g_Width	= texWidth;
 					x->g_Height	= texHeight;
+					x->textype = textype;
 					x->bInitialized = true;
 				}
 			}
@@ -479,6 +496,7 @@ t_jit_err jit_gl_spoutsender_draw(t_jit_gl_spoutsender *x)
 			else if(texWidth  !=  (GLuint)x->g_Width 
 				 || texHeight !=  (GLuint)x->g_Height
 				 || texId     !=  x->g_texId
+				 || textype   != x->textype
 				 || strncmp(x->sendername->s_name, x->g_SenderName, 256) != 0) {
 					// Reset and initialize again the next time round
 					x->mySender->ReleaseSender();
