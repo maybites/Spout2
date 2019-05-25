@@ -119,7 +119,7 @@ typedef struct _jit_gl_spout_receiver
 	long update; // update to the active sender
 	long aspect; // retain aspect ratio of input texture
 	long memoryshare; // memory share instead of interop directx texture share
-	t_atom_long  dim[2]; // dimension input
+	long  dim[2]; // dimension input
 
 	// Our Spout receiver object
 	SpoutReceiver * myReceiver;
@@ -210,14 +210,18 @@ t_jit_err jit_gl_spout_receiver_init(void)
 {
 
 	// setup our OB3D flags to indicate our capabilities.
-	long ob3d_flags = JIT_OB3D_NO_MATRIXOUTPUT; // no matrix output
+	long ob3d_flags = JIT_OB3D_NO_MATRIXOUTPUT;
 	ob3d_flags |= JIT_OB3D_NO_ROTATION_SCALE;
 	ob3d_flags |= JIT_OB3D_NO_POLY_VARS;
+	ob3d_flags |= JIT_OB3D_NO_BLEND;
 	ob3d_flags |= JIT_OB3D_NO_FOG;
-	ob3d_flags |= JIT_OB3D_NO_MATRIXOUTPUT;
 	ob3d_flags |= JIT_OB3D_NO_LIGHTING_MATERIAL;
 	ob3d_flags |= JIT_OB3D_NO_DEPTH;
+	ob3d_flags |= JIT_OB3D_NO_ANTIALIAS;
 	ob3d_flags |= JIT_OB3D_NO_COLOR;
+	ob3d_flags |= JIT_OB3D_NO_SHADER;
+	ob3d_flags |= JIT_OB3D_NO_BOUNDS;
+	ob3d_flags |= JIT_OB3D_NO_POSITION;
 
 	_jit_gl_spout_receiver_class = jit_class_new("jit_gl_spout_receiver", 
 										 (method)jit_gl_spout_receiver_new, (method)jit_gl_spout_receiver_free,
@@ -361,6 +365,7 @@ t_jit_gl_spout_receiver *jit_gl_spout_receiver_new(t_symbol * dest_name)
 		x->output = (t_jit_object *)jit_object_new(ps_out_texture, dest_name);
 
 		if (x->output) {
+			t_atom_long dim[2];
 			x->texturename = jit_symbol_unique();
 			// set texture attributes.
 			jit_attr_setsym(x->output,  _jit_sym_name, x->texturename);
@@ -368,10 +373,10 @@ t_jit_gl_spout_receiver *jit_gl_spout_receiver_new(t_symbol * dest_name)
 			jit_attr_setlong(x->output, gensym("rectangle"), 1);
 			jit_attr_setlong(x->output, gensym("flip"), 0);
 			// Set dimension output
-			x->dim[0] = 320; 
-			x->dim[1] = 240;
+			dim[0] = x->dim[0] = 320; 
+			dim[1] = x->dim[1] = 240;
 			// Set texture size
-			jit_attr_setlong_array(x->output, _jit_sym_dim, 2, x->dim);
+			jit_attr_setlong_array(x->output, _jit_sym_dim, 2, dim);
         } 
 		else {
 			jit_object_error((t_object *)x,"jit.gl.spoutReceiver: could not create texture");
@@ -950,7 +955,7 @@ t_jit_err jit_gl_spout_receiver_setattr_dim(t_jit_gl_spout_receiver *x, void *at
 	UNREFERENCED_PARAMETER(attr);
 
  	long i;
-	t_atom_long v;
+	t_atom_long v, vals[2];
 
 	if (x) 	{
 
@@ -962,7 +967,9 @@ t_jit_err jit_gl_spout_receiver_setattr_dim(t_jit_gl_spout_receiver *x, void *at
 		}
 
         // update internal output texture size as well
-        jit_attr_setlong_array(x->output, _jit_sym_dim, 2, x->dim);
+		vals[0] = x->dim[0];
+		vals[1] = x->dim[1];
+        jit_attr_setlong_array(x->output, _jit_sym_dim, 2, vals);
 
 		return JIT_ERR_NONE;
 	}

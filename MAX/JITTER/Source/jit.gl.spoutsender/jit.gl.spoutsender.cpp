@@ -205,13 +205,18 @@ t_jit_err jit_gl_spoutsender_init(void)
 												sizeof(t_jit_gl_spoutsender),A_DEFSYM,0L);
 	
 	// setup our OB3D flags to indicate our capabilities.
-	long ob3d_flags = JIT_OB3D_NO_MATRIXOUTPUT; // no matrix output
+	long ob3d_flags = JIT_OB3D_NO_MATRIXOUTPUT;
 	ob3d_flags |= JIT_OB3D_NO_ROTATION_SCALE;
 	ob3d_flags |= JIT_OB3D_NO_POLY_VARS;
+	ob3d_flags |= JIT_OB3D_NO_BLEND;
 	ob3d_flags |= JIT_OB3D_NO_FOG;
 	ob3d_flags |= JIT_OB3D_NO_LIGHTING_MATERIAL;
 	ob3d_flags |= JIT_OB3D_NO_DEPTH;
+	ob3d_flags |= JIT_OB3D_NO_ANTIALIAS;
 	ob3d_flags |= JIT_OB3D_NO_COLOR;
+	ob3d_flags |= JIT_OB3D_NO_SHADER;
+	ob3d_flags |= JIT_OB3D_NO_BOUNDS;
+	ob3d_flags |= JIT_OB3D_NO_POSITION;
 	
 	// set up object extension for 3d object, customized with flags
 	void *ob3d;
@@ -227,9 +232,10 @@ t_jit_err jit_gl_spoutsender_init(void)
 	jit_class_addattr(_jit_gl_spoutsender_class,attr);
 	
 	// invert
-	attr = (t_jit_object *)jit_object_new(_jit_sym_jit_attr_offset,"invert",_jit_sym_symbol,attrflags,
+	attr = (t_jit_object *)jit_object_new(_jit_sym_jit_attr_offset,"invert",_jit_sym_long,attrflags,
 						  (method)0L, jit_gl_spoutsender_invert, calcoffset(t_jit_gl_spoutsender, invert));	
 	jit_class_addattr(_jit_gl_spoutsender_class,attr);
+	object_addattr_parse(attr, "style", _jit_sym_symbol, 0, "onoff");
 	
 	// define our OB3D draw method.  called in automatic mode by 
 	jit_class_addmethod(_jit_gl_spoutsender_class, (method)jit_gl_spoutsender_draw, "ob3d_draw", A_CANT, 0L);
@@ -289,8 +295,8 @@ t_jit_gl_spoutsender *jit_gl_spoutsender_new(t_symbol *dest_name)
 		// Create a new Spout sender
 		x->mySender = new SpoutSender;
 		
-		// Syphon comment - TODO : is this right ? LJ - not sure
-		jit_attr_setsym(x->sendername, _jit_sym_name, gensym("sendername"));
+		x->sendername = jit_symbol_unique();
+		jit_attr_setsym(x, gensym("sendername"), x->sendername);
 
 		// instantiate a single internal jit.gl.texture for matrix input
 		x->texture = (t_symbol *)jit_object_new(ps_jit_gl_texture, jit_attr_getsym(x, ps_drawto) );
