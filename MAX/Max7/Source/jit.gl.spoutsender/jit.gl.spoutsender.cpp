@@ -217,7 +217,6 @@ t_jit_err jit_gl_spoutsender_init(void)
 	ob3d_flags |= JIT_OB3D_NO_COLOR;
 	ob3d_flags |= JIT_OB3D_NO_SHADER;
 	ob3d_flags |= JIT_OB3D_NO_BOUNDS;
-	ob3d_flags |= JIT_OB3D_NO_POSITION;
 	
 	// set up object extension for 3d object, customized with flags
 	void *ob3d;
