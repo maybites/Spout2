@@ -473,12 +473,11 @@ t_jit_err jit_gl_spoutsender_draw(t_jit_gl_spoutsender *x)
 				// x->bMemoryshare = x->mySender->GetMemoryShareMode();
 				// Create a sender
 				DWORD format = 0;
-				if (
-					textype == _jit_sym_float32 ||
-					textype == gensym("float16") ||
-					textype == gensym("float")
-				) {
+				if (textype == gensym("float16")) {
 					format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+				}
+				else if (textype == _jit_sym_float32 || textype == gensym("float")) {
+					format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 				}
 				else {
 					x->mySender->SetDX9compatible(true);

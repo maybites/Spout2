@@ -667,12 +667,15 @@ t_jit_err jit_gl_spout_receiver_draw(t_jit_gl_spout_receiver *x)
 				HANDLE hSharehandle = NULL;
 				DWORD dwFormat = 0;
 				unsigned int w, h;
+				t_symbol *textype = _jit_sym_char;
 				x->myReceiver->GetSenderInfo(x->g_SenderName, w, h, hSharehandle, dwFormat);
-				
-				jit_attr_setsym(
-					x->output, gensym("type"), 
-					dwFormat == DXGI_FORMAT_R16G16B16A16_FLOAT ? gensym("float32") : gensym("char")
-				);
+				if (dwFormat == DXGI_FORMAT_R16G16B16A16_FLOAT) {
+					textype = gensym("float16");
+				}
+				else if (dwFormat == DXGI_FORMAT_R32G32B32A32_FLOAT) {
+					textype = _jit_sym_float32;
+				}
+				jit_attr_setsym(x->output, gensym("type"), textype);
 			}
 			// Update output texture to the new size
 			newdim[0] = x->g_Width;
