@@ -4,85 +4,82 @@
     <ClCompile Include="$(C74SUPPORT)\max-includes\common\dllmain_win.c" />
     <ClCompile Include="$(C74SUPPORT)\max-includes\common\commonsyms.c" />
     <ClCompile Include="jit.gl.spoutsender.cpp" />
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutCopy.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutDirectX.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutGLDXinterop.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutGLextensions.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutMemoryShare.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutReceiver.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutSDK.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutSender.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutSenderMemory.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutSenderNames.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\SpoutSDK\Source\SpoutSharedMemory.cpp">
-      <Filter>SpoutSDK</Filter>
-    </ClCompile>
     <ClCompile Include="max.jit.gl.spoutsender.cpp" />
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\Spout.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutCopy.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutDirectX.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutFrameCount.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutGL.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutGLextensions.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutReceiver.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutSender.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutSenderNames.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutSharedMemory.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutUtils.cpp">
+      <Filter>SpoutGL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="SpoutSDK">
-      <UniqueIdentifier>{e159b5c7-26fd-4054-857c-becae8aba571}</UniqueIdentifier>
+    <Filter Include="SpoutGL">
+      <UniqueIdentifier>{316c3a4d-715b-4d06-8e8d-02450640730b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\Spout.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\Spout.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutCommon.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutCommon.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutCopy.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutCopy.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutDirectX.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutDirectX.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutGLDXinterop.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutFrameCount.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutGLextensions.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutGL.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutMemoryShare.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutGLextensions.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutReceiver.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutReceiver.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutSDK.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutSender.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutSender.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutSenderNames.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutSenderMemory.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutSharedMemory.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutSenderNames.h">
-      <Filter>SpoutSDK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\SpoutSDK\Source\SpoutSharedMemory.h">
-      <Filter>SpoutSDK</Filter>
+    <ClInclude Include="..\..\..\..\SPOUTSDK\SpoutGL\SpoutUtils.h">
+      <Filter>SpoutGL</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
