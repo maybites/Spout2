@@ -63,7 +63,7 @@
 // * Note that the same definition is necessary in SpoutGLextensions.h
 //   so that SpoutGLextensions can be used independently of the Spout library.
 //
-// #define legacyOpenGL
+#define legacyOpenGL
 //
 
 // Common utility functions namespace

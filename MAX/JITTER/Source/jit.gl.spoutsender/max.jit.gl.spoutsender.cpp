@@ -93,9 +93,9 @@ int C74_EXPORT main(void)
 	t_class *maxclass, *jitclass;
 
 	#ifdef ENV64BIT
-	post("jit_gl_spout_sender - Vers 2.007h (64 bit)");
+	post("jit.gl.spoutsender - Vers 2.007h (64 bit)");
 	#else
-	post("jit_gl_spout_sender - Vers 2.007h (32 bit)");
+	post("jit.gl.spoutsender - Vers 2.007h (32 bit)");
 	#endif
 
 

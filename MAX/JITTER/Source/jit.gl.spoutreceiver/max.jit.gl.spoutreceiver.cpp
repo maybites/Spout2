@@ -114,9 +114,9 @@ void ext_main(void *r)
 
 	// Show the version for reference
 	#ifdef ENV64BIT
-	post("jit_gl_spout_receiver - Vers 2.007h (64 bit)");
+	post("jit.gl.spoutreceiver - Vers 2.007h (64 bit)");
 	#else
-	post("jit_gl_spout_receiver - Vers 2.007h (32 bit)");
+	post("jit.gl.spoutreceiver - Vers 2.007h (32 bit)");
 	#endif
 
 	// initialize our Jitter class

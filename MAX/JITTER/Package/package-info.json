@@ -27,7 +27,7 @@
 	}
 ,
 	"tags" : [ "jitter", "video", "graphics", "opengl", "externals" ],
-	"version" : "2.0.6",
+	"version" : "2.0.7",
 	"website" : "http://spout.zeal.co",
 	"filelist" : 	{
 		"externals" : [ "jit.gl.spoutreceiver.mxe", "jit.gl.spoutreceiver.mxe64", "jit.gl.spoutsender.mxe", "jit.gl.spoutsender.mxe64" ],

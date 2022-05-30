@@ -100,8 +100,9 @@
 #include "jit.gl.draw.h"
 #include "ext_obex.h"
 #include "ext_preferences.h"
-#include "string"
+#include <string>
 #include "SpoutReceiver.h"
+#include "Spout.h"
 
 
 t_jit_err jit_ob3d_dest_name_set(t_jit_object *x, void *attr, long argc, t_atom *argv);
@@ -114,6 +115,9 @@ typedef struct _jit_gl_spout_receiver
 	// 3d object extension.  This is what all objects in the GL group have in common.
 	void *ob3d;
 		
+	// reference to the max object
+	void* maxob = NULL;
+
 	// attributes
 	t_symbol *sendername; // Use for sharing name
 	t_symbol *texturename;	
@@ -354,6 +358,7 @@ t_jit_err jit_gl_spout_receiver_init(void)
 
 	jit_class_register(_jit_gl_spout_receiver_class);
 
+
 	return JIT_ERR_NONE;
 }
 
@@ -545,7 +550,7 @@ void jit_gl_spout_receiver_drawgl2(t_jit_gl_spout_receiver *x, GLuint texname)
 		}
 		else {
 			// Otherwise draw the shared texture straight into it
-			//x->myReceiver->DrawSharedTexture();
+			x->myReceiver->DrawSharedTexture();
 		}
 	}
 
@@ -726,7 +731,11 @@ t_jit_err jit_gl_spout_receiver_draw(t_jit_gl_spout_receiver *x)
 
 			atom_setsym(&atomName, gensym(x->g_frameMetadata));
 
-			//outlet_anything(x->dumpout, ps_frame_metadata, 1, &atomName);
+			// reference the max wrapper 
+			object_obex_lookup(x, gensym("maxwrapper"), (t_object**)&x->maxob);
+
+			// output the result from the max wrappers dump outlet
+			max_jit_obex_dumpout(x->maxob, ps_frame_metadata, 1, &atomName);
 		}
 
 		// Receive a shared texture and return it's width and height

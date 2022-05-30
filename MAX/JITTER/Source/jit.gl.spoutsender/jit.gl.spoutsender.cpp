@@ -94,7 +94,8 @@
 #include "jit.gl.ob3d.h"
 #include "ext_obex.h"
 #include "ext_preferences.h"
-#include "string"
+#include <string.h>
+#include <algorithm>
 
 #include "SpoutSender.h"
 
@@ -458,7 +459,7 @@ t_jit_err jit_gl_spoutsender_frame_metadata(t_jit_gl_spoutsender* x, t_symbol* s
 	t_symbol* name;
 
 	// Use this for user input of sharing name
-	if (x) {
+	if (x && x->frame_metadata_size > 0) {
 		if (argc && argv) {
 			name = jit_atom_getsym(argv);
 			x->frame_metadata = name;
@@ -469,7 +470,11 @@ t_jit_err jit_gl_spoutsender_frame_metadata(t_jit_gl_spoutsender* x, t_symbol* s
 			strcpy_s(x->g_frameMetadata, 6, "empty");
 		}
 		// set the name for this sender
-		strcpy_s(x->g_frameMetadata, x->frame_metadata_size, x->frame_metadata->s_name);
+		//strncpy_s(x->g_frameMetadata, x->frame_metadata_size, x->frame_metadata->s_name, strlen(x->frame_metadata->s_name) + 1);
+		int contentSize = min(x->frame_metadata_size - 1, strlen(x->frame_metadata->s_name));
+
+		strncpy(x->g_frameMetadata, x->frame_metadata->s_name, contentSize);
+		x->g_frameMetadata[contentSize] = 0x00;
 	}
 
 	return JIT_ERR_NONE;
@@ -560,7 +565,9 @@ t_jit_err jit_gl_spoutsender_draw(t_jit_gl_spoutsender *x)
 				// No actual rendering is done here, this is just sending out a texture
 				if (x->bInitialized) {
 					x->mySender->SendTexture(texId, texTarget, texWidth, texHeight, bInvert);
-					x->mySender->WriteMemoryBuffer(x->g_SenderName, x->g_frameMetadata, x->frame_metadata_size);
+					if (x->frame_metadata_size > 0) {
+						x->mySender->WriteMemoryBuffer(x->g_SenderName, x->g_frameMetadata, x->frame_metadata_size);
+					}
 				}
 			} // end if size was OK and normal draw
 
